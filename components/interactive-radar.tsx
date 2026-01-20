@@ -58,7 +58,7 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
   const centerX = size / 2;
   const centerY = size / 2;
   // Match FluidicCore's baseRadius calculation exactly
-  const maxRadius = size * 0.38;
+  const maxRadius = size * 0.30;
   const levels = 4;
   const hitRadius = Math.max(16, maxRadius * 0.22);
 
@@ -327,53 +327,35 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
                 }}
               />
 
-              {/* Value label when dragging - positioned to avoid label overlap */}
+              {/* Value label when dragging - positioned next to axis label */}
               {isDragged && (() => {
-                // Position value text based on axis to avoid overlapping with axis label
-                // S(0): top, A(1): right-top, B(2): right-bottom, I(3): left-bottom, T(4): left-top
-                // For S (top): put value to the right
-                // For A (right-top): put value below-right
-                // For B (right-bottom): put value below-right
-                // For I (left-bottom): put value below-left
-                // For T (left-top): put value above-left
+                // Position value directly next to the axis label (S/A/B/I/T)
+                // S(0): top - value to the right of S
+                // A(1): right-top - value to the right of A
+                // B(2): right-bottom - value to the right of B
+                // I(3): left-bottom - value to the left of I
+                // T(4): left-top - value to the left of T
                 
-                let offsetX = 0;
-                let offsetY = 0;
-                let textAnchor: "start" | "middle" | "end" = "middle";
+                // Use label position as base
+                const baseX = endpoint.labelX;
+                const baseY = endpoint.labelY;
                 
-                if (i === 0) { // S - top
-                  offsetX = 25;
-                  offsetY = 0;
-                  textAnchor = "start";
-                } else if (i === 1) { // A - right-top
-                  offsetX = 20;
-                  offsetY = 15;
-                  textAnchor = "start";
-                } else if (i === 2) { // B - right-bottom
-                  offsetX = 20;
-                  offsetY = 0;
-                  textAnchor = "start";
-                } else if (i === 3) { // I - left-bottom
-                  offsetX = -20;
-                  offsetY = 0;
-                  textAnchor = "end";
-                } else { // T - left-top
-                  offsetX = -20;
-                  offsetY = 15;
-                  textAnchor = "end";
-                }
+                // Offset from label: right side labels get value on right, left side on left
+                const isRightSide = i === 0 || i === 1 || i === 2; // S, A, B
+                const offsetX = isRightSide ? 12 : -12;
+                const textAnchor = isRightSide ? "start" : "end";
                 
                 return (
                   <text
-                    x={endpoint.x + offsetX}
-                    y={endpoint.y + offsetY}
+                    x={baseX + offsetX}
+                    y={baseY}
                     textAnchor={textAnchor}
                     dominantBaseline="middle"
                     className="select-none"
                     style={{
-                      fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
-                      fontSize: "14px",
-                      fontWeight: 700,
+                      fontFamily: "'SF Mono', 'Fira Code', monospace",
+                      fontSize: "12px",
+                      fontWeight: 600,
                       fill: dim.color,
                       filter: `drop-shadow(0 0 4px oklch(0 0 0 / 0.8))`,
                     }}
