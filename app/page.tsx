@@ -114,7 +114,7 @@ export default function XMusicBar() {
   return (
     <main className="min-h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header - compact */}
-      <header className="shrink-0 px-4 pt-3 pb-1">
+      <header className="shrink-0 px-4 pt-2 pb-1 md:pt-1 md:pb-0.5">
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center"
@@ -145,7 +145,7 @@ export default function XMusicBar() {
       </header>
 
       {/* Fluidic Core with Interactive Radar overlay */}
-      <section className="flex-1 px-3 py-1">
+      <section className="flex-1 px-2 py-1 md:px-1 md:py-0.5">
         <motion.div
           className="relative rounded-2xl border border-border/30 overflow-hidden h-full"
           style={{
@@ -160,13 +160,13 @@ export default function XMusicBar() {
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Container - measure full size */}
-          <div ref={containerRef} className="h-full min-h-[200px] relative flex items-center justify-center p-2">
+          <div ref={containerRef} className="h-full min-h-[180px] md:min-h-[160px] relative flex items-center justify-center p-2 md:p-1">
             {/* Square drawing area - centered in container with padding for labels */}
             {containerSize.width > 0 && containerSize.height > 0 && (() => {
-              // Use 95% of the smaller dimension to maximize display while leaving room for labels
+              // Use 97% of the smaller dimension to maximize display while leaving room for labels
               const availableWidth = containerSize.width - 8;
               const availableHeight = containerSize.height - 8;
-              const squareSize = Math.min(availableWidth, availableHeight) * 0.95;
+              const squareSize = Math.min(availableWidth, availableHeight) * 0.97;
               return (
                 <div 
                   className="relative"
@@ -194,7 +194,7 @@ export default function XMusicBar() {
       </section>
 
       {/* Bottom Section - SABIT Values Display (responsive height) */}
-      <section className="shrink-0 px-4 pt-2 pb-4">
+      <section className="shrink-0 px-4 pt-2 pb-4 md:pt-1 md:pb-2">
         <motion.div
           className="rounded-2xl border border-border/30 p-2 sm:p-3"
           style={{
