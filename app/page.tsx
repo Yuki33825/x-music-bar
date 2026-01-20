@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { FluidicCore } from "@/components/fluidic-core";
 import { SabitSliders } from "@/components/sabit-sliders";
 import { InteractiveRadar } from "@/components/interactive-radar";
-// Custom icon component: Cyber cocktail glass with digital sound waves
+// Custom icon component: Cyber cocktail glass with prominent sound wave
 function XMusicBarIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -16,7 +16,7 @@ function XMusicBarIcon({ className }: { className?: string }) {
     >
       <defs>
         {/* Neon blue-purple gradient */}
-        <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#60A5FA" />
           <stop offset="50%" stopColor="#A78BFA" />
           <stop offset="100%" stopColor="#C084FC" />
@@ -26,9 +26,9 @@ function XMusicBarIcon({ className }: { className?: string }) {
           <stop offset="0%" stopColor="#94A3B8" />
           <stop offset="100%" stopColor="#64748B" />
         </linearGradient>
-        {/* Glow filter */}
-        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="0.8" result="coloredBlur"/>
+        {/* Strong glow filter */}
+        <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
           <feMerge>
             <feMergeNode in="coloredBlur"/>
             <feMergeNode in="SourceGraphic"/>
@@ -46,36 +46,15 @@ function XMusicBarIcon({ className }: { className?: string }) {
         fill="none"
       />
       
-      {/* Digital sound waves inside glass */}
+      {/* Prominent sound wave - extends beyond glass */}
       <g filter="url(#glow)">
-        {/* Wave 1 */}
         <path
-          d="M7.5 6L8.5 5L9.5 7L10.5 4.5L11.5 7L12.5 5L13.5 7L14.5 5L15.5 6.5L16.5 5"
+          d="M3 8L5 5L7 10L9 3L11 11L13 2L15 10L17 4L19 9L21 6"
           stroke="url(#waveGradient)"
-          strokeWidth="1.2"
+          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
-        />
-        {/* Wave 2 */}
-        <path
-          d="M8.5 8.5L9.5 7.5L10.5 9L11.5 7L12.5 9.5L13.5 7.5L14.5 9L15.5 8"
-          stroke="url(#waveGradient)"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          opacity="0.8"
-        />
-        {/* Wave 3 - subtle */}
-        <path
-          d="M9.5 10.5L10.5 10L11.5 11L12.5 9.5L13.5 11L14 10.5"
-          stroke="url(#waveGradient)"
-          strokeWidth="1"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          opacity="0.6"
         />
       </g>
     </svg>
