@@ -58,7 +58,7 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
   const centerX = size / 2;
   const centerY = size / 2;
   // Match FluidicCore's baseRadius calculation exactly
-  const maxRadius = size * 0.30;
+  const maxRadius = size * 0.35;
   const levels = 4;
   const hitRadius = Math.max(16, maxRadius * 0.22);
 

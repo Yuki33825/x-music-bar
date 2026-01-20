@@ -163,10 +163,10 @@ export default function XMusicBar() {
           <div ref={containerRef} className="h-full min-h-[200px] relative flex items-center justify-center p-2">
             {/* Square drawing area - centered in container with padding for labels */}
             {containerSize.width > 0 && containerSize.height > 0 && (() => {
-              // Use 90% of the smaller dimension to leave room for labels and controls
-              const availableWidth = containerSize.width - 16; // padding
-              const availableHeight = containerSize.height - 16;
-              const squareSize = Math.min(availableWidth, availableHeight) * 0.92;
+              // Use 95% of the smaller dimension to maximize display while leaving room for labels
+              const availableWidth = containerSize.width - 8;
+              const availableHeight = containerSize.height - 8;
+              const squareSize = Math.min(availableWidth, availableHeight) * 0.95;
               return (
                 <div 
                   className="relative"
