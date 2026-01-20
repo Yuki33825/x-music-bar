@@ -163,8 +163,12 @@ export default function XMusicBar() {
           <div ref={containerRef} className="h-full min-h-[280px] relative flex items-center justify-center">
             {/* Square drawing area - centered in container, optimized for landscape */}
             {containerSize.width > 0 && containerSize.height > 0 && (() => {
-              // Use 95% of the smaller dimension to maximize display area
-              const squareSize = Math.min(containerSize.width, containerSize.height) * 0.95;
+              // For landscape mode (iPad横), use almost full height
+              // For portrait mode, use almost full width
+              const isLandscape = containerSize.width > containerSize.height * 1.2;
+              const squareSize = isLandscape 
+                ? containerSize.height * 0.98  // Landscape: use nearly all height
+                : Math.min(containerSize.width, containerSize.height) * 0.95;
               return (
                 <div 
                   className="relative"

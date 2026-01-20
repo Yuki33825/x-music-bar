@@ -194,9 +194,11 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
         {/* Axis lines and labels */}
         {DIMENSIONS.map((dim, i) => {
           const endpoint = getAxisEndpoint(i);
-          const isActive = vectors[dim.key] > 0;
+          const value = vectors[dim.key];
           const isHovered = hovering === dim.key;
           const isDragged = dragging === dim.key;
+          // Line is colored if: value > 0, or being dragged, or being hovered
+          const showColor = value > 0 || isDragged || isHovered;
 
           return (
             <g key={dim.key}>
@@ -205,12 +207,12 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
                 y1={centerY}
                 x2={endpoint.x}
                 y2={endpoint.y}
-                stroke={isActive || isHovered || isDragged ? dim.color : "oklch(0.35 0.02 260)"}
+                stroke={showColor ? dim.color : "oklch(0.35 0.02 260)"}
                 strokeWidth={isDragged ? 2 : isHovered ? 1.5 : 1}
-                strokeDasharray={isActive ? "none" : "4,4"}
+                strokeDasharray={value > 0 ? "none" : "4,4"}
                 style={{
-                  filter: isActive || isDragged ? `drop-shadow(0 0 4px ${dim.color})` : "none",
-                  transition: "stroke-width 0.15s ease",
+                  filter: showColor ? `drop-shadow(0 0 4px ${dim.color})` : "none",
+                  transition: "stroke 0.1s ease, stroke-width 0.15s ease, filter 0.1s ease",
                 }}
               />
               <text
@@ -222,10 +224,11 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
                 style={{
                   fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
                   fontSize: "13px",
-                  fontWeight: isActive || isDragged ? 600 : 500,
+                  fontWeight: showColor ? 600 : 500,
                   letterSpacing: "0.02em",
-                  fill: isActive || isDragged ? dim.color : "oklch(0.60 0.02 260)",
+                  fill: showColor ? dim.color : "oklch(0.60 0.02 260)",
                   filter: isDragged ? `drop-shadow(0 0 6px ${dim.color})` : "none",
+                  transition: "fill 0.1s ease, font-weight 0.1s ease",
                 }}
               >
                 {dim.label}
@@ -327,16 +330,51 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
                 }}
               />
 
-              {/* Value label when dragging - S/A/B on right, I/T on left */}
+              {/* Value label when dragging - positioned to avoid label overlap */}
               {isDragged && (() => {
-                // S(0), A(1), B(2) -> right side, I(3), T(4) -> left side
-                const isRightSide = i <= 2;
-                const offsetX = isRightSide ? 20 : -20;
+                // Position based on axis location to avoid overlap with labels
+                // S(0): top -> show below-right
+                // A(1): top-right -> show below-right  
+                // B(2): bottom-right -> show right
+                // I(3): bottom-left -> show left
+                // T(4): top-left -> show below-left
+                let offsetX = 0;
+                let offsetY = 0;
+                let anchor: "start" | "end" | "middle" = "middle";
+                
+                switch (dim.key) {
+                  case "S": // top
+                    offsetX = 25;
+                    offsetY = 5;
+                    anchor = "start";
+                    break;
+                  case "A": // top-right
+                    offsetX = 20;
+                    offsetY = 18;
+                    anchor = "start";
+                    break;
+                  case "B": // bottom-right
+                    offsetX = 20;
+                    offsetY = 0;
+                    anchor = "start";
+                    break;
+                  case "I": // bottom-left
+                    offsetX = -20;
+                    offsetY = 0;
+                    anchor = "end";
+                    break;
+                  case "T": // top-left
+                    offsetX = -20;
+                    offsetY = 18;
+                    anchor = "end";
+                    break;
+                }
+                
                 return (
                   <text
                     x={endpoint.x + offsetX}
-                    y={endpoint.y}
-                    textAnchor={isRightSide ? "start" : "end"}
+                    y={endpoint.y + offsetY}
+                    textAnchor={anchor}
                     dominantBaseline="middle"
                     className="select-none"
                     style={{
