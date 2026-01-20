@@ -72,29 +72,27 @@ export function FluidicCore({ vectors, containerSize }: FluidicCoreProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    if (containerSize.width === 0 || containerSize.height === 0) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const resize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-    };
+    // Use containerSize from props - same source as InteractiveRadar
+    const width = containerSize.width;
+    const height = containerSize.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const baseRadius = Math.min(width, height) * 0.32;
 
-    resize();
-    window.addEventListener("resize", resize);
+    // Set canvas size with devicePixelRatio for crisp rendering
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    ctx.scale(dpr, dpr);
 
     const animate = () => {
-      // Use containerSize from props for consistent centering with InteractiveRadar
-      const width = containerSize.width || canvas.getBoundingClientRect().width;
-      const height = containerSize.height || canvas.getBoundingClientRect().height;
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const baseRadius = Math.min(width, height) * 0.32;
-
       timeRef.current += 0.016;
       const time = timeRef.current;
 
@@ -401,7 +399,6 @@ export function FluidicCore({ vectors, containerSize }: FluidicCoreProps) {
     animate();
 
     return () => {
-      window.removeEventListener("resize", resize);
       cancelAnimationFrame(animationRef.current);
     };
   }, [visualParams, vectors, containerSize]);
