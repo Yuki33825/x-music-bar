@@ -327,17 +327,18 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
                 }}
               />
 
-              {/* Value label when dragging */}
+              {/* Value label when dragging - positioned toward center to avoid label overlap */}
               {isDragged && (
                 <text
-                  x={endpoint.x}
-                  y={endpoint.y - 24}
+                  x={centerX + (endpoint.x - centerX) * 0.7}
+                  y={centerY + (endpoint.y - centerY) * 0.7}
                   textAnchor="middle"
+                  dominantBaseline="middle"
                   className="select-none"
                   style={{
                     fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
-                    fontSize: "13px",
-                    fontWeight: 600,
+                    fontSize: "14px",
+                    fontWeight: 700,
                     fill: dim.color,
                     filter: `drop-shadow(0 0 4px oklch(0 0 0 / 0.8))`,
                   }}
