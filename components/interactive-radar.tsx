@@ -29,29 +29,40 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<keyof VectorValues | null>(null);
   const [hovering, setHovering] = useState<keyof VectorValues | null>(null);
-  const [containerSize, setContainerSize] = useState(240);
+  const [dimensions, setDimensions] = useState({ width: 300, height: 300 });
 
-  // Responsive size based on container
+  // Match FluidicCore's sizing: use full container dimensions
   useEffect(() => {
     const updateSize = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        // Use the smaller dimension to ensure it fits, max 280px
-        const newSize = Math.min(rect.width, rect.height, 280);
-        setContainerSize(newSize);
+        setDimensions({ width: rect.width, height: rect.height });
       }
     };
 
     updateSize();
     window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
+    
+    // Also observe container size changes
+    const resizeObserver = new ResizeObserver(updateSize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    
+    return () => {
+      window.removeEventListener("resize", updateSize);
+      resizeObserver.disconnect();
+    };
   }, []);
 
-  const size = containerSize;
-  const center = size / 2;
-  const maxRadius = size * 0.36;
+  const { width, height } = dimensions;
+  // Match FluidicCore exactly: center is width/2, height/2
+  const centerX = width / 2;
+  const centerY = height / 2;
+  // Match FluidicCore's baseRadius calculation: Math.min(width, height) * 0.32
+  const maxRadius = Math.min(width, height) * 0.32;
   const levels = 4;
-  const hitRadius = Math.max(16, size * 0.08);
+  const hitRadius = Math.max(16, maxRadius * 0.22);
 
   const getAngle = useCallback((index: number) => {
     return (index / 5) * Math.PI * 2 - Math.PI / 2;
@@ -62,25 +73,26 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
       const angle = getAngle(index);
       const radius = value * maxRadius;
       return {
-        x: center + Math.cos(angle) * radius,
-        y: center + Math.sin(angle) * radius,
+        x: centerX + Math.cos(angle) * radius,
+        y: centerY + Math.sin(angle) * radius,
       };
     },
-    [center, maxRadius, getAngle]
+    [centerX, centerY, maxRadius, getAngle]
   );
 
   const getAxisEndpoint = useCallback(
     (index: number) => {
       const angle = getAngle(index);
+      const labelOffset = Math.min(22, maxRadius * 0.25);
       return {
-        x: center + Math.cos(angle) * maxRadius,
-        y: center + Math.sin(angle) * maxRadius,
-        labelX: center + Math.cos(angle) * (maxRadius + 22),
-        labelY: center + Math.sin(angle) * (maxRadius + 22),
+        x: centerX + Math.cos(angle) * maxRadius,
+        y: centerY + Math.sin(angle) * maxRadius,
+        labelX: centerX + Math.cos(angle) * (maxRadius + labelOffset),
+        labelY: centerY + Math.sin(angle) * (maxRadius + labelOffset),
         angle,
       };
     },
-    [center, maxRadius, getAngle]
+    [centerX, centerY, maxRadius, getAngle]
   );
 
   const calculateValueFromPosition = useCallback(
@@ -88,8 +100,8 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
       if (!svgRef.current) return null;
 
       const rect = svgRef.current.getBoundingClientRect();
-      const x = clientX - rect.left - center;
-      const y = clientY - rect.top - center;
+      const x = clientX - rect.left - centerX;
+      const y = clientY - rect.top - centerY;
 
       const angle = getAngle(dimIndex);
       const axisX = Math.cos(angle);
@@ -101,7 +113,7 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
 
       return Math.round(normalizedValue * 100) / 100;
     },
-    [center, maxRadius, getAngle]
+    [centerX, centerY, maxRadius, getAngle]
   );
 
   const handlePointerDown = useCallback(
@@ -146,13 +158,13 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
   const hasActiveVectors = Object.values(vectors).some((v) => v > 0);
 
   return (
-    <div ref={containerRef} className="flex flex-col items-center w-full h-full justify-center">
+    <div ref={containerRef} className="w-full h-full relative">
       <svg
         ref={svgRef}
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
-        className="touch-none"
+        width={width}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        className="touch-none absolute inset-0"
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
@@ -164,7 +176,7 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
             <stop offset="100%" stopColor="oklch(0.75 0.15 30 / 0)" />
           </radialGradient>
         </defs>
-        <circle cx={center} cy={center} r={maxRadius * 1.3} fill="url(#radarGlow)" />
+        <circle cx={centerX} cy={centerY} r={maxRadius * 1.3} fill="url(#radarGlow)" />
 
         {/* Level circles */}
         {Array.from({ length: levels }).map((_, i) => {
@@ -172,8 +184,8 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
           return (
             <circle
               key={i}
-              cx={center}
-              cy={center}
+              cx={centerX}
+              cy={centerY}
               r={levelRadius}
               fill="none"
               stroke="oklch(0.30 0.02 260)"
@@ -193,8 +205,8 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
           return (
             <g key={dim.key}>
               <line
-                x1={center}
-                y1={center}
+                x1={centerX}
+                y1={centerY}
                 x2={endpoint.x}
                 y2={endpoint.y}
                 stroke={isActive || isHovered || isDragged ? dim.color : "oklch(0.35 0.02 260)"}
@@ -236,7 +248,7 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             style={{
-              transformOrigin: `${center}px ${center}px`,
+              transformOrigin: `${centerX}px ${centerY}px`,
               filter: "drop-shadow(0 0 12px oklch(0.85 0.04 260 / 0.4))",
             }}
           />
@@ -342,22 +354,25 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
         })}
 
         {/* Center point */}
-        <circle cx={center} cy={center} r={3} fill="oklch(0.50 0.02 260)" />
-      </svg>
+        <circle cx={centerX} cy={centerY} r={3} fill="oklch(0.50 0.02 260)" />
 
-      {/* Instructions */}
-      <p
-        className="mt-2 select-none"
-        style={{
-          fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
-          fontSize: "11px",
-          fontWeight: 500,
-          letterSpacing: "0.04em",
-          color: "oklch(0.55 0.02 260)",
-        }}
-      >
-        Drag to blend taste and texture
-      </p>
+        {/* Instructions - positioned at bottom center of SVG */}
+        <text
+          x={centerX}
+          y={height - 16}
+          textAnchor="middle"
+          className="select-none"
+          style={{
+            fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+            fontSize: "11px",
+            fontWeight: 500,
+            letterSpacing: "0.04em",
+            fill: "oklch(0.55 0.02 260)",
+          }}
+        >
+          Drag to blend taste and texture
+        </text>
+      </svg>
     </div>
   );
 }
