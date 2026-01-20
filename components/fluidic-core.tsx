@@ -405,12 +405,19 @@ export function FluidicCore({ vectors, containerSize }: FluidicCoreProps) {
 
   return (
     <motion.div
-      className="relative w-full h-full"
+      className="absolute inset-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <canvas ref={canvasRef} className="w-full h-full" />
+      <canvas 
+        ref={canvasRef} 
+        className="absolute top-0 left-0"
+        style={{
+          width: containerSize.width || '100%',
+          height: containerSize.height || '100%',
+        }}
+      />
     </motion.div>
   );
 }

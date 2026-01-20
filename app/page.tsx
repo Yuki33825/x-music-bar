@@ -174,17 +174,21 @@ export default function XMusicBar() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Container - both visualizations share exact same space */}
+          {/* Container - both visualizations absolutely positioned from same parent */}
           <div ref={containerRef} className="h-full min-h-[280px] relative">
-            {/* FluidicCore - fills entire container */}
-            <FluidicCore vectors={vectors} containerSize={containerSize} />
-            {/* Interactive Radar overlay - absolute positioned to match FluidicCore exactly */}
+            {/* FluidicCore - absolute positioned */}
+            <div className="absolute inset-0">
+              <FluidicCore vectors={vectors} containerSize={containerSize} />
+            </div>
+            {/* Semi-transparent overlay */}
             <div
-              className="absolute inset-0"
+              className="absolute inset-0 pointer-events-none"
               style={{
                 background: "oklch(0.05 0.01 260 / 0.3)",
               }}
-            >
+            />
+            {/* Interactive Radar - absolute positioned, same as FluidicCore */}
+            <div className="absolute inset-0">
               <InteractiveRadar vectors={vectors} onChange={setVectors} containerSize={containerSize} />
             </div>
           </div>

@@ -135,13 +135,17 @@ export function InteractiveRadar({ vectors, onChange, containerSize }: Interacti
   const hasActiveVectors = Object.values(vectors).some((v) => v > 0);
 
   return (
-    <div className="w-full h-full relative">
+    <div className="absolute inset-0">
       <svg
         ref={svgRef}
         width={width}
         height={height}
         viewBox={`0 0 ${width} ${height}`}
-        className="touch-none absolute inset-0"
+        className="touch-none absolute top-0 left-0"
+        style={{
+          width: width || '100%',
+          height: height || '100%',
+        }}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
