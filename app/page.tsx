@@ -149,16 +149,31 @@ export default function XMusicBar() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="h-full min-h-[280px] relative">
-            <FluidicCore vectors={vectors} />
-            {/* Interactive Radar overlay - centered */}
-            <div
-              className="absolute inset-0 flex items-center justify-center"
+          {/* Container with aspect ratio to ensure consistent centering */}
+          <div className="h-full min-h-[280px] flex items-center justify-center relative">
+            {/* Centered square container for both visualizations */}
+            <div 
+              className="relative"
               style={{
-                background: "oklch(0.05 0.01 260 / 0.3)",
+                width: "min(100%, 100vh - 280px)",
+                aspectRatio: "1 / 1",
+                maxWidth: "400px",
+                maxHeight: "100%",
               }}
             >
-              <InteractiveRadar vectors={vectors} onChange={setVectors} />
+              {/* FluidicCore - fills the square container */}
+              <div className="absolute inset-0">
+                <FluidicCore vectors={vectors} />
+              </div>
+              {/* Interactive Radar overlay - centered in the same container */}
+              <div
+                className="absolute inset-0 flex items-center justify-center"
+                style={{
+                  background: "oklch(0.05 0.01 260 / 0.3)",
+                }}
+              >
+                <InteractiveRadar vectors={vectors} onChange={setVectors} />
+              </div>
             </div>
           </div>
         </motion.div>

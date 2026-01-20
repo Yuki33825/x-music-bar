@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useState, useMemo } from "react";
+import React, { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 
 interface VectorValues {
@@ -26,14 +26,32 @@ const DIMENSIONS = [
 
 export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<keyof VectorValues | null>(null);
   const [hovering, setHovering] = useState<keyof VectorValues | null>(null);
+  const [containerSize, setContainerSize] = useState(240);
 
-  const size = 240;
+  // Responsive size based on container
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        // Use the smaller dimension to ensure it fits, max 280px
+        const newSize = Math.min(rect.width, rect.height, 280);
+        setContainerSize(newSize);
+      }
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+
+  const size = containerSize;
   const center = size / 2;
   const maxRadius = size * 0.36;
   const levels = 4;
-  const hitRadius = 20;
+  const hitRadius = Math.max(16, size * 0.08);
 
   const getAngle = useCallback((index: number) => {
     return (index / 5) * Math.PI * 2 - Math.PI / 2;
@@ -128,11 +146,12 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
   const hasActiveVectors = Object.values(vectors).some((v) => v > 0);
 
   return (
-    <div className="flex flex-col items-center">
+    <div ref={containerRef} className="flex flex-col items-center w-full h-full justify-center">
       <svg
         ref={svgRef}
         width={size}
         height={size}
+        viewBox={`0 0 ${size} ${size}`}
         className="touch-none"
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
