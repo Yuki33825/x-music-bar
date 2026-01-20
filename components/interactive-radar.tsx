@@ -355,7 +355,7 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
         {/* Instructions - positioned at bottom center of SVG */}
         <text
           x={centerX}
-          y={height - 16}
+          y={size - 16}
           textAnchor="middle"
           className="select-none"
           style={{
