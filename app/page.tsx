@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { FluidicCore } from "@/components/fluidic-core";
 import { SabitSliders } from "@/components/sabit-sliders";
 import { InteractiveRadar } from "@/components/interactive-radar";
-// Custom icon component: Cyber cocktail glass with prominent sound wave
+// Custom icon component: Cyber cocktail glass with digital sound wave
 function XMusicBarIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -46,10 +46,10 @@ function XMusicBarIcon({ className }: { className?: string }) {
         fill="none"
       />
       
-      {/* Prominent sound wave - extends beyond glass */}
+      {/* Single prominent sound wave - extends beyond glass */}
       <g filter="url(#glow)">
         <path
-          d="M3 8L5 5L7 10L9 3L11 11L13 2L15 10L17 4L19 9L21 6"
+          d="M3 7L5 5L7 8L9 4L11 9L13 3L15 8L17 5L19 7L21 6"
           stroke="url(#waveGradient)"
           strokeWidth="2"
           strokeLinecap="round"
