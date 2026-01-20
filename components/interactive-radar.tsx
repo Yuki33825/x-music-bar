@@ -371,22 +371,24 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
         {/* Center point */}
         <circle cx={centerX} cy={centerY} r={3} fill="oklch(0.50 0.02 260)" />
 
-        {/* Instructions - positioned at bottom center of SVG */}
-        <text
-          x={centerX}
-          y={size - 16}
-          textAnchor="middle"
-          className="select-none"
-          style={{
-            fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
-            fontSize: "11px",
-            fontWeight: 500,
-            letterSpacing: "0.04em",
-            fill: "oklch(0.55 0.02 260)",
-          }}
-        >
-          Drag to blend taste and texture
-        </text>
+        {/* Instructions - positioned at bottom center of SVG, hidden when too small */}
+        {size > 250 && (
+          <text
+            x={centerX}
+            y={size - 16}
+            textAnchor="middle"
+            className="select-none"
+            style={{
+              fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+              fontSize: "11px",
+              fontWeight: 500,
+              letterSpacing: "0.04em",
+              fill: "oklch(0.55 0.02 260)",
+            }}
+          >
+            Drag to blend taste and texture
+          </text>
+        )}
       </svg>
     </div>
   );

@@ -163,21 +163,22 @@ export default function XMusicBar() {
           <div ref={containerRef} className="h-full relative flex items-center justify-center p-2 md:p-0.5">
             {/* Square drawing area - centered in container with padding for labels */}
             {containerSize.width > 0 && containerSize.height > 0 && (() => {
-              // Use 98% of the smaller dimension to maximize display while leaving room for labels
+              // Use available space intelligently to prevent shrinking on wide screens
               const availableWidth = containerSize.width - 4;
               const availableHeight = containerSize.height - 4;
               
-              // Maximum size to prevent chart from becoming invisible on wide screens
-              const maxSize = 800;
-              
-              // Calculate base size from smaller dimension
-              let squareSize = Math.min(availableWidth, availableHeight) * 0.98;
-              
-              // For wide screens (width > 1.5x height), prioritize height to prevent shrinking
-              if (availableWidth > availableHeight * 1.5) {
-                squareSize = Math.min(availableHeight * 0.98, maxSize);
+              // For very wide screens, use 90% of height (more aggressive)
+              // This ensures chart stays large even on ultra-wide displays
+              let squareSize;
+              if (availableWidth > availableHeight * 2) {
+                // Ultra-wide: use 90% of height
+                squareSize = availableHeight * 0.90;
+              } else if (availableWidth > availableHeight * 1.3) {
+                // Wide: use 95% of height
+                squareSize = availableHeight * 0.95;
               } else {
-                squareSize = Math.min(squareSize, maxSize);
+                // Normal: use smaller dimension
+                squareSize = Math.min(availableWidth, availableHeight) * 0.98;
               }
               return (
                 <div 
