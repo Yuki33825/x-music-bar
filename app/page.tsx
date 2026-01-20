@@ -166,7 +166,19 @@ export default function XMusicBar() {
               // Use 98% of the smaller dimension to maximize display while leaving room for labels
               const availableWidth = containerSize.width - 4;
               const availableHeight = containerSize.height - 4;
-              const squareSize = Math.min(availableWidth, availableHeight) * 0.98;
+              
+              // Maximum size to prevent chart from becoming invisible on wide screens
+              const maxSize = 800;
+              
+              // Calculate base size from smaller dimension
+              let squareSize = Math.min(availableWidth, availableHeight) * 0.98;
+              
+              // For wide screens (width > 1.5x height), prioritize height to prevent shrinking
+              if (availableWidth > availableHeight * 1.5) {
+                squareSize = Math.min(availableHeight * 0.98, maxSize);
+              } else {
+                squareSize = Math.min(squareSize, maxSize);
+              }
               return (
                 <div 
                   className="relative"
