@@ -46,12 +46,12 @@ function XMusicBarIcon({ className }: { className?: string }) {
         fill="none"
       />
       
-      {/* Single prominent sound wave - extends beyond glass */}
+      {/* Sound wave - extends above glass, 3-4 folds */}
       <g filter="url(#glow)">
         <path
-          d="M3 7L5 5L7 8L9 4L11 9L13 3L15 8L17 5L19 7L21 6"
+          d="M4 5L8 1L12 6L16 0L20 4"
           stroke="url(#waveGradient)"
-          strokeWidth="2"
+          strokeWidth="1.3"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
@@ -161,28 +161,32 @@ export default function XMusicBar() {
         >
           {/* Container - measure full size */}
           <div ref={containerRef} className="h-full min-h-[280px] relative flex items-center justify-center">
-            {/* Square drawing area - centered in container */}
-            {containerSize.width > 0 && containerSize.height > 0 && (
-              <div 
-                className="relative"
-                style={{
-                  width: Math.min(containerSize.width, containerSize.height),
-                  height: Math.min(containerSize.width, containerSize.height),
-                }}
-              >
-                {/* FluidicCore */}
-                <FluidicCore vectors={vectors} />
-                {/* Semi-transparent overlay */}
-                <div
-                  className="absolute inset-0 pointer-events-none"
+            {/* Square drawing area - centered in container, optimized for landscape */}
+            {containerSize.width > 0 && containerSize.height > 0 && (() => {
+              // Use 95% of the smaller dimension to maximize display area
+              const squareSize = Math.min(containerSize.width, containerSize.height) * 0.95;
+              return (
+                <div 
+                  className="relative"
                   style={{
-                    background: "oklch(0.05 0.01 260 / 0.3)",
+                    width: squareSize,
+                    height: squareSize,
                   }}
-                />
-                {/* Interactive Radar */}
-                <InteractiveRadar vectors={vectors} onChange={setVectors} />
-              </div>
-            )}
+                >
+                  {/* FluidicCore */}
+                  <FluidicCore vectors={vectors} />
+                  {/* Semi-transparent overlay */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: "oklch(0.05 0.01 260 / 0.3)",
+                    }}
+                  />
+                  {/* Interactive Radar */}
+                  <InteractiveRadar vectors={vectors} onChange={setVectors} />
+                </div>
+              );
+            })()}
           </div>
         </motion.div>
       </section>

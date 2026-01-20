@@ -327,25 +327,30 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
                 }}
               />
 
-              {/* Value label when dragging - positioned toward center to avoid label overlap */}
-              {isDragged && (
-                <text
-                  x={centerX + (endpoint.x - centerX) * 0.7}
-                  y={centerY + (endpoint.y - centerY) * 0.7}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  className="select-none"
-                  style={{
-                    fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    fill: dim.color,
-                    filter: `drop-shadow(0 0 4px oklch(0 0 0 / 0.8))`,
-                  }}
-                >
-                  {vectors[dim.key].toFixed(2)}
-                </text>
-              )}
+              {/* Value label when dragging - S/A/B on right, I/T on left */}
+              {isDragged && (() => {
+                // S(0), A(1), B(2) -> right side, I(3), T(4) -> left side
+                const isRightSide = i <= 2;
+                const offsetX = isRightSide ? 20 : -20;
+                return (
+                  <text
+                    x={endpoint.x + offsetX}
+                    y={endpoint.y}
+                    textAnchor={isRightSide ? "start" : "end"}
+                    dominantBaseline="middle"
+                    className="select-none"
+                    style={{
+                      fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      fill: dim.color,
+                      filter: `drop-shadow(0 0 4px oklch(0 0 0 / 0.8))`,
+                    }}
+                  >
+                    {vectors[dim.key].toFixed(2)}
+                  </text>
+                );
+              })()}
             </g>
           );
         })}
