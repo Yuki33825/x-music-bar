@@ -111,16 +111,13 @@ export default function XMusicBar() {
     };
   }, []);
 
-  // Detect landscape mode for layout adjustments
-  const isLandscape = containerSize.width > containerSize.height * 1.2;
-
   return (
     <main className="min-h-[100dvh] bg-background flex flex-col overflow-hidden">
-      {/* Header - smaller in landscape */}
-      <header className={`shrink-0 px-4 ${isLandscape ? 'pt-2 pb-1' : 'pt-4 pb-2'}`}>
+      {/* Header - compact */}
+      <header className="shrink-0 px-4 pt-3 pb-1">
         <div className="flex items-center gap-3">
           <div
-            className={`${isLandscape ? 'w-8 h-8' : 'w-10 h-10'} rounded-xl flex items-center justify-center`}
+            className="w-10 h-10 rounded-xl flex items-center justify-center"
             style={{
               background:
                 "linear-gradient(145deg, oklch(0.14 0.02 260) 0%, oklch(0.08 0.015 270) 100%)",
@@ -131,12 +128,12 @@ export default function XMusicBar() {
               `,
             }}
           >
-            <XMusicBarIcon className={isLandscape ? "w-5 h-5" : "w-7 h-7"} />
+            <XMusicBarIcon className="w-7 h-7" />
           </div>
           <h1
             style={{
               fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
-              fontSize: isLandscape ? "14px" : "17px",
+              fontSize: "17px",
               fontWeight: 600,
               letterSpacing: "-0.02em",
               color: "oklch(0.95 0.01 260)",
@@ -148,7 +145,7 @@ export default function XMusicBar() {
       </header>
 
       {/* Fluidic Core with Interactive Radar overlay */}
-      <section className={`flex-1 px-4 ${isLandscape ? 'py-1' : 'py-2'}`}>
+      <section className="flex-1 px-3 py-1">
         <motion.div
           className="relative rounded-2xl border border-border/30 overflow-hidden h-full"
           style={{
@@ -163,13 +160,11 @@ export default function XMusicBar() {
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Container - measure full size */}
-          <div ref={containerRef} className={`h-full ${isLandscape ? 'min-h-0' : 'min-h-[280px]'} relative flex items-center justify-center`}>
-            {/* Square drawing area - centered in container, optimized for iPad Air 3 landscape */}
+          <div ref={containerRef} className="h-full min-h-[240px] relative flex items-center justify-center">
+            {/* Square drawing area - centered in container, maximized */}
             {containerSize.width > 0 && containerSize.height > 0 && (() => {
-              // For landscape mode (iPad横), maximize the display
-              const squareSize = isLandscape 
-                ? containerSize.height * 0.99  // Landscape: use 99% of height
-                : Math.min(containerSize.width, containerSize.height) * 0.95;
+              // Use 98% of the smaller dimension to maximize display area
+              const squareSize = Math.min(containerSize.width, containerSize.height) * 0.98;
               return (
                 <div 
                   className="relative"
@@ -196,21 +191,20 @@ export default function XMusicBar() {
         </motion.div>
       </section>
 
-      {/* Bottom Section - SABIT Values Display - compact in landscape */}
-      <section className={`shrink-0 px-4 ${isLandscape ? 'pt-1 pb-2' : 'pt-2 pb-4'}`}>
+      {/* Bottom Section - SABIT Values Display (responsive height) */}
+      <section className="shrink-0 px-4 pt-2 pb-4">
         <motion.div
-          className={`rounded-2xl border border-border/30 ${isLandscape ? 'p-2' : 'p-3'}`}
+          className="rounded-2xl border border-border/30 p-2 sm:p-3"
           style={{
             background:
               "linear-gradient(180deg, oklch(0.12 0.015 260) 0%, oklch(0.10 0.012 260) 100%)",
             boxShadow: "inset 0 1px 0 oklch(1 0 0 / 0.03)",
-            maxHeight: isLandscape ? "80px" : "180px",
           }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <SabitSliders values={vectors} isCompact={isLandscape} />
+          <SabitSliders values={vectors} />
         </motion.div>
       </section>
     </main>

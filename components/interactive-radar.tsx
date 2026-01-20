@@ -58,7 +58,7 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
   const centerX = size / 2;
   const centerY = size / 2;
   // Match FluidicCore's baseRadius calculation exactly
-  const maxRadius = size * 0.32;
+  const maxRadius = size * 0.38;
   const levels = 4;
   const hitRadius = Math.max(16, maxRadius * 0.22);
 
@@ -194,11 +194,9 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
         {/* Axis lines and labels */}
         {DIMENSIONS.map((dim, i) => {
           const endpoint = getAxisEndpoint(i);
-          const value = vectors[dim.key];
+          const isActive = vectors[dim.key] > 0;
           const isHovered = hovering === dim.key;
           const isDragged = dragging === dim.key;
-          // Line is colored if: value > 0, or being dragged, or being hovered
-          const showColor = value > 0 || isDragged || isHovered;
 
           return (
             <g key={dim.key}>
@@ -207,12 +205,12 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
                 y1={centerY}
                 x2={endpoint.x}
                 y2={endpoint.y}
-                stroke={showColor ? dim.color : "oklch(0.35 0.02 260)"}
-                strokeWidth={isDragged ? 2 : isHovered ? 1.5 : 1}
-                strokeDasharray={value > 0 ? "none" : "4,4"}
+                stroke={isDragged || isActive || isHovered ? dim.color : "oklch(0.35 0.02 260)"}
+                strokeWidth={isDragged ? 2.5 : isHovered ? 1.5 : isActive ? 1.2 : 1}
+                strokeDasharray={isDragged || isActive ? "none" : "4,4"}
                 style={{
-                  filter: showColor ? `drop-shadow(0 0 4px ${dim.color})` : "none",
-                  transition: "stroke 0.1s ease, stroke-width 0.15s ease, filter 0.1s ease",
+                  filter: isDragged || isActive ? `drop-shadow(0 0 6px ${dim.color})` : "none",
+                  transition: "all 0.15s ease",
                 }}
               />
               <text
@@ -224,11 +222,10 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
                 style={{
                   fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
                   fontSize: "13px",
-                  fontWeight: showColor ? 600 : 500,
+                  fontWeight: isActive || isDragged ? 600 : 500,
                   letterSpacing: "0.02em",
-                  fill: showColor ? dim.color : "oklch(0.60 0.02 260)",
+                  fill: isActive || isDragged ? dim.color : "oklch(0.60 0.02 260)",
                   filter: isDragged ? `drop-shadow(0 0 6px ${dim.color})` : "none",
-                  transition: "fill 0.1s ease, font-weight 0.1s ease",
                 }}
               >
                 {dim.label}
@@ -332,49 +329,45 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
 
               {/* Value label when dragging - positioned to avoid label overlap */}
               {isDragged && (() => {
-                // Position based on axis location to avoid overlap with labels
-                // S(0): top -> show below-right
-                // A(1): top-right -> show below-right  
-                // B(2): bottom-right -> show right
-                // I(3): bottom-left -> show left
-                // T(4): top-left -> show below-left
+                // Position value text based on axis to avoid overlapping with axis label
+                // S(0): top, A(1): right-top, B(2): right-bottom, I(3): left-bottom, T(4): left-top
+                // For S (top): put value to the right
+                // For A (right-top): put value below-right
+                // For B (right-bottom): put value below-right
+                // For I (left-bottom): put value below-left
+                // For T (left-top): put value above-left
+                
                 let offsetX = 0;
                 let offsetY = 0;
-                let anchor: "start" | "end" | "middle" = "middle";
+                let textAnchor: "start" | "middle" | "end" = "middle";
                 
-                switch (dim.key) {
-                  case "S": // top
-                    offsetX = 25;
-                    offsetY = 5;
-                    anchor = "start";
-                    break;
-                  case "A": // top-right
-                    offsetX = 20;
-                    offsetY = 18;
-                    anchor = "start";
-                    break;
-                  case "B": // bottom-right
-                    offsetX = 20;
-                    offsetY = 0;
-                    anchor = "start";
-                    break;
-                  case "I": // bottom-left
-                    offsetX = -20;
-                    offsetY = 0;
-                    anchor = "end";
-                    break;
-                  case "T": // top-left
-                    offsetX = -20;
-                    offsetY = 18;
-                    anchor = "end";
-                    break;
+                if (i === 0) { // S - top
+                  offsetX = 25;
+                  offsetY = 0;
+                  textAnchor = "start";
+                } else if (i === 1) { // A - right-top
+                  offsetX = 20;
+                  offsetY = 15;
+                  textAnchor = "start";
+                } else if (i === 2) { // B - right-bottom
+                  offsetX = 20;
+                  offsetY = 0;
+                  textAnchor = "start";
+                } else if (i === 3) { // I - left-bottom
+                  offsetX = -20;
+                  offsetY = 0;
+                  textAnchor = "end";
+                } else { // T - left-top
+                  offsetX = -20;
+                  offsetY = 15;
+                  textAnchor = "end";
                 }
                 
                 return (
                   <text
                     x={endpoint.x + offsetX}
                     y={endpoint.y + offsetY}
-                    textAnchor={anchor}
+                    textAnchor={textAnchor}
                     dominantBaseline="middle"
                     className="select-none"
                     style={{

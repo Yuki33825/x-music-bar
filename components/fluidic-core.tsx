@@ -86,7 +86,7 @@ export function FluidicCore({ vectors }: FluidicCoreProps) {
     const height = size;
     const centerX = size / 2;
     const centerY = size / 2;
-    const baseRadius = size * 0.32;
+    const baseRadius = size * 0.38;
 
     // Set canvas size with devicePixelRatio for crisp rendering
     const dpr = window.devicePixelRatio || 1;

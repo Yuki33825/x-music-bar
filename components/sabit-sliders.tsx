@@ -14,7 +14,6 @@ interface VectorValues {
 
 interface SabitSlidersProps {
   values: VectorValues;
-  isCompact?: boolean;
 }
 
 const DIMENSIONS = [
@@ -60,7 +59,7 @@ const DIMENSIONS = [
   },
 ];
 
-export function SabitSliders({ values, isCompact = false }: SabitSlidersProps) {
+export function SabitSliders({ values }: SabitSlidersProps) {
   const total = useMemo(() => {
     return Object.values(values).reduce((sum, v) => sum + v, 0);
   }, [values]);
@@ -77,30 +76,27 @@ export function SabitSliders({ values, isCompact = false }: SabitSlidersProps) {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header - hidden in compact mode */}
-      {!isCompact && (
-        <div className="shrink-0 mb-3">
-          <h2
-            style={{
-              fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
-              fontSize: "10px",
-              fontWeight: 600,
-              letterSpacing: "0.12em",
-              color: "oklch(0.55 0.02 260)",
-              textTransform: "uppercase",
-            }}
-          >
-            SABIT Balance
-          </h2>
-        </div>
-      )}
+      {/* Header */}
+      <div className="shrink-0 mb-3">
+        <h2
+          style={{
+            fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+            fontSize: "10px",
+            fontWeight: 600,
+            letterSpacing: "0.12em",
+            color: "oklch(0.55 0.02 260)",
+            textTransform: "uppercase",
+          }}
+        >
+          SABIT Balance
+        </h2>
+      </div>
 
       {/* Stacked Bar */}
       <div
-        className="relative rounded-xl overflow-hidden flex-1"
+        className="relative rounded-xl overflow-hidden"
         style={{
-          height: isCompact ? "36px" : "64px",
-          minHeight: isCompact ? "36px" : "64px",
+          height: "64px",
           background: "oklch(0.12 0.015 260)",
           boxShadow: "inset 0 2px 4px oklch(0 0 0 / 0.4)",
         }}
@@ -133,42 +129,40 @@ export function SabitSliders({ values, isCompact = false }: SabitSlidersProps) {
               >
                 {/* Content - only show if segment is wide enough */}
                 <motion.div
-                  className={`flex ${isCompact ? 'flex-row gap-1' : 'flex-col gap-0.5'} items-center justify-center`}
+                  className="flex flex-col items-center justify-center gap-0.5"
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: percentage >= (isCompact ? 10 : 8) ? 1 : 0 }}
+                  animate={{ opacity: percentage >= 8 ? 1 : 0 }}
                   transition={{ duration: 0.2 }}
                 >
                   {/* Icon */}
                   <Icon
-                    size={isCompact ? 12 : 14}
+                    size={14}
                     style={{
                       color: isActive ? "oklch(0.98 0.01 260)" : "oklch(0.45 0.02 260)",
                       filter: isActive ? "drop-shadow(0 1px 2px oklch(0 0 0 / 0.3))" : "none",
                     }}
                   />
                   
-                  {/* Label - in compact mode, only show label */}
-                  {!isCompact && (
-                    <span
-                      style={{
-                        fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
-                        fontSize: showFullName ? "8px" : "9px",
-                        fontWeight: 600,
-                        letterSpacing: "0.01em",
-                        color: isActive ? "oklch(0.98 0.01 260)" : "oklch(0.45 0.02 260)",
-                        textShadow: isActive ? "0 1px 2px oklch(0 0 0 / 0.3)" : "none",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {showFullName ? dim.fullName : dim.label}
-                    </span>
-                  )}
+                  {/* Full Name or Label */}
+                  <span
+                    style={{
+                      fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+                      fontSize: showFullName ? "8px" : "9px",
+                      fontWeight: 600,
+                      letterSpacing: "0.01em",
+                      color: isActive ? "oklch(0.98 0.01 260)" : "oklch(0.45 0.02 260)",
+                      textShadow: isActive ? "0 1px 2px oklch(0 0 0 / 0.3)" : "none",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {showFullName ? dim.fullName : dim.label}
+                  </span>
                   
                   {/* Percentage */}
                   <span
                     style={{
                       fontFamily: "'SF Mono', 'Fira Code', monospace",
-                      fontSize: isCompact ? "9px" : "10px",
+                      fontSize: "10px",
                       fontWeight: 500,
                       color: isActive ? "oklch(0.95 0.02 260)" : "oklch(0.40 0.02 260)",
                       textShadow: isActive ? "0 1px 2px oklch(0 0 0 / 0.3)" : "none",
@@ -195,35 +189,33 @@ export function SabitSliders({ values, isCompact = false }: SabitSlidersProps) {
         </div>
       </div>
 
-      {/* Legend - compact row below (hidden in compact mode) */}
-      {!isCompact && (
-        <div className="shrink-0 mt-2 flex justify-between px-1">
-          {DIMENSIONS.map((dim) => {
-            const Icon = dim.icon;
-            const value = values[dim.key];
-            const isActive = value > 0;
+      {/* Legend - compact row below */}
+      <div className="shrink-0 mt-2 flex justify-between px-1">
+        {DIMENSIONS.map((dim) => {
+          const Icon = dim.icon;
+          const value = values[dim.key];
+          const isActive = value > 0;
 
-            return (
-              <div key={dim.key} className="flex items-center gap-1">
-                <Icon
-                  size={10}
-                  style={{ color: isActive ? dim.color : "oklch(0.45 0.02 260)" }}
-                />
-                <span
-                  style={{
-                    fontFamily: "'SF Mono', 'Fira Code', monospace",
-                    fontSize: "10px",
-                    fontWeight: 500,
-                    color: isActive ? dim.color : "oklch(0.45 0.02 260)",
-                  }}
-                >
-                  {value.toFixed(2)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+          return (
+            <div key={dim.key} className="flex items-center gap-1">
+              <Icon
+                size={10}
+                style={{ color: isActive ? dim.color : "oklch(0.45 0.02 260)" }}
+              />
+              <span
+                style={{
+                  fontFamily: "'SF Mono', 'Fira Code', monospace",
+                  fontSize: "10px",
+                  fontWeight: 500,
+                  color: isActive ? dim.color : "oklch(0.45 0.02 260)",
+                }}
+              >
+                {value.toFixed(2)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
