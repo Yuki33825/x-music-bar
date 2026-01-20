@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useState, useMemo, useEffect } from "react";
+import React, { useCallback, useRef, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 
 interface VectorValues {
@@ -14,6 +14,7 @@ interface VectorValues {
 interface InteractiveRadarProps {
   vectors: VectorValues;
   onChange: (values: VectorValues) => void;
+  containerSize: { width: number; height: number };
 }
 
 const DIMENSIONS = [
@@ -24,38 +25,14 @@ const DIMENSIONS = [
   { key: "T" as const, label: "T", fullName: "Texture", color: "oklch(0.65 0.15 280)" },
 ];
 
-export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
+export function InteractiveRadar({ vectors, onChange, containerSize }: InteractiveRadarProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<keyof VectorValues | null>(null);
   const [hovering, setHovering] = useState<keyof VectorValues | null>(null);
-  const [dimensions, setDimensions] = useState({ width: 300, height: 300 });
 
-  // Match FluidicCore's sizing: use full container dimensions
-  useEffect(() => {
-    const updateSize = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setDimensions({ width: rect.width, height: rect.height });
-      }
-    };
-
-    updateSize();
-    window.addEventListener("resize", updateSize);
-    
-    // Also observe container size changes
-    const resizeObserver = new ResizeObserver(updateSize);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-    
-    return () => {
-      window.removeEventListener("resize", updateSize);
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  const { width, height } = dimensions;
+  // Use containerSize from props - same source as FluidicCore
+  const width = containerSize.width || 300;
+  const height = containerSize.height || 300;
   // Match FluidicCore exactly: center is width/2, height/2
   const centerX = width / 2;
   const centerY = height / 2;
@@ -158,7 +135,7 @@ export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
   const hasActiveVectors = Object.values(vectors).some((v) => v > 0);
 
   return (
-    <div ref={containerRef} className="w-full h-full relative">
+    <div className="w-full h-full relative">
       <svg
         ref={svgRef}
         width={width}

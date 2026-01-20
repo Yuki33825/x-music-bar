@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FluidicCore } from "@/components/fluidic-core";
 import { SabitSliders } from "@/components/sabit-sliders";
@@ -100,6 +100,31 @@ const DEFAULT_VALUES: VectorValues = {
 
 export default function XMusicBar() {
   const [vectors, setVectors] = useState<VectorValues>(DEFAULT_VALUES);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+  // Measure shared container size for both FluidicCore and InteractiveRadar
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setContainerSize({ width: rect.width, height: rect.height });
+      }
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    
+    const resizeObserver = new ResizeObserver(updateSize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener("resize", updateSize);
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   return (
     <main className="min-h-[100dvh] bg-background flex flex-col overflow-hidden">
@@ -150,9 +175,9 @@ export default function XMusicBar() {
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Container - both visualizations share exact same space */}
-          <div className="h-full min-h-[280px] relative">
+          <div ref={containerRef} className="h-full min-h-[280px] relative">
             {/* FluidicCore - fills entire container */}
-            <FluidicCore vectors={vectors} />
+            <FluidicCore vectors={vectors} containerSize={containerSize} />
             {/* Interactive Radar overlay - absolute positioned to match FluidicCore exactly */}
             <div
               className="absolute inset-0"
@@ -160,7 +185,7 @@ export default function XMusicBar() {
                 background: "oklch(0.05 0.01 260 / 0.3)",
               }}
             >
-              <InteractiveRadar vectors={vectors} onChange={setVectors} />
+              <InteractiveRadar vectors={vectors} onChange={setVectors} containerSize={containerSize} />
             </div>
           </div>
         </motion.div>

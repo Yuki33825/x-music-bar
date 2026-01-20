@@ -11,9 +11,10 @@ interface FluidicCoreProps {
     I: number;
     T: number;
   };
+  containerSize: { width: number; height: number };
 }
 
-export function FluidicCore({ vectors }: FluidicCoreProps) {
+export function FluidicCore({ vectors, containerSize }: FluidicCoreProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
   const timeRef = useRef(0);
@@ -87,9 +88,9 @@ export function FluidicCore({ vectors }: FluidicCoreProps) {
     window.addEventListener("resize", resize);
 
     const animate = () => {
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
+      // Use containerSize from props for consistent centering with InteractiveRadar
+      const width = containerSize.width || canvas.getBoundingClientRect().width;
+      const height = containerSize.height || canvas.getBoundingClientRect().height;
       const centerX = width / 2;
       const centerY = height / 2;
       const baseRadius = Math.min(width, height) * 0.32;
@@ -403,7 +404,7 @@ export function FluidicCore({ vectors }: FluidicCoreProps) {
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(animationRef.current);
     };
-  }, [visualParams, vectors]);
+  }, [visualParams, vectors, containerSize]);
 
   return (
     <motion.div
