@@ -11,10 +11,10 @@ interface FluidicCoreProps {
     I: number;
     T: number;
   };
-  containerSize: { width: number; height: number };
 }
 
-export function FluidicCore({ vectors, containerSize }: FluidicCoreProps) {
+export function FluidicCore({ vectors }: FluidicCoreProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
   const timeRef = useRef(0);
@@ -71,25 +71,27 @@ export function FluidicCore({ vectors, containerSize }: FluidicCoreProps) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    if (containerSize.width === 0 || containerSize.height === 0) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Use containerSize from props - same source as InteractiveRadar
-    const width = containerSize.width;
-    const height = containerSize.height;
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const baseRadius = Math.min(width, height) * 0.32;
+    // Get size from parent container (which is now a square)
+    const rect = container.getBoundingClientRect();
+    const size = rect.width; // Square, so width === height
+    if (size === 0) return;
+
+    const width = size;
+    const height = size;
+    const centerX = size / 2;
+    const centerY = size / 2;
+    const baseRadius = size * 0.32;
 
     // Set canvas size with devicePixelRatio for crisp rendering
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
     ctx.scale(dpr, dpr);
 
     const animate = () => {
@@ -401,10 +403,11 @@ export function FluidicCore({ vectors, containerSize }: FluidicCoreProps) {
     return () => {
       cancelAnimationFrame(animationRef.current);
     };
-  }, [visualParams, vectors, containerSize]);
+  }, [visualParams, vectors]);
 
   return (
     <motion.div
+      ref={containerRef}
       className="absolute inset-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -412,11 +415,7 @@ export function FluidicCore({ vectors, containerSize }: FluidicCoreProps) {
     >
       <canvas 
         ref={canvasRef} 
-        className="absolute top-0 left-0"
-        style={{
-          width: containerSize.width || '100%',
-          height: containerSize.height || '100%',
-        }}
+        className="w-full h-full"
       />
     </motion.div>
   );

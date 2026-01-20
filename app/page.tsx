@@ -103,12 +103,18 @@ export default function XMusicBar() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
-  // Measure shared container size for both FluidicCore and InteractiveRadar
+  // Measure shared container and calculate square drawing area centered within it
   useEffect(() => {
     const updateSize = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        setContainerSize({ width: rect.width, height: rect.height });
+        // Use the smaller dimension to create a square drawing area
+        const squareSize = Math.min(rect.width, rect.height);
+        // Center the square within the container
+        setContainerSize({ 
+          width: rect.width, 
+          height: rect.height,
+        });
       }
     };
 
@@ -174,23 +180,30 @@ export default function XMusicBar() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Container - both visualizations absolutely positioned from same parent */}
-          <div ref={containerRef} className="h-full min-h-[280px] relative">
-            {/* FluidicCore - absolute positioned */}
-            <div className="absolute inset-0">
-              <FluidicCore vectors={vectors} containerSize={containerSize} />
-            </div>
-            {/* Semi-transparent overlay */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: "oklch(0.05 0.01 260 / 0.3)",
-              }}
-            />
-            {/* Interactive Radar - absolute positioned, same as FluidicCore */}
-            <div className="absolute inset-0">
-              <InteractiveRadar vectors={vectors} onChange={setVectors} containerSize={containerSize} />
-            </div>
+          {/* Container - measure full size */}
+          <div ref={containerRef} className="h-full min-h-[280px] relative flex items-center justify-center">
+            {/* Square drawing area - centered in container */}
+            {containerSize.width > 0 && containerSize.height > 0 && (
+              <div 
+                className="relative"
+                style={{
+                  width: Math.min(containerSize.width, containerSize.height),
+                  height: Math.min(containerSize.width, containerSize.height),
+                }}
+              >
+                {/* FluidicCore */}
+                <FluidicCore vectors={vectors} />
+                {/* Semi-transparent overlay */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: "oklch(0.05 0.01 260 / 0.3)",
+                  }}
+                />
+                {/* Interactive Radar */}
+                <InteractiveRadar vectors={vectors} onChange={setVectors} />
+              </div>
+            )}
           </div>
         </motion.div>
       </section>

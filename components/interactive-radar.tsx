@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useState, useMemo } from "react";
+import React, { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 
 interface VectorValues {
@@ -14,7 +14,6 @@ interface VectorValues {
 interface InteractiveRadarProps {
   vectors: VectorValues;
   onChange: (values: VectorValues) => void;
-  containerSize: { width: number; height: number };
 }
 
 const DIMENSIONS = [
@@ -25,19 +24,41 @@ const DIMENSIONS = [
   { key: "T" as const, label: "T", fullName: "Texture", color: "oklch(0.65 0.15 280)" },
 ];
 
-export function InteractiveRadar({ vectors, onChange, containerSize }: InteractiveRadarProps) {
+export function InteractiveRadar({ vectors, onChange }: InteractiveRadarProps) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<keyof VectorValues | null>(null);
   const [hovering, setHovering] = useState<keyof VectorValues | null>(null);
+  const [size, setSize] = useState(300);
 
-  // Use containerSize from props - same source as FluidicCore
-  const width = containerSize.width || 300;
-  const height = containerSize.height || 300;
-  // Match FluidicCore exactly: center is width/2, height/2
-  const centerX = width / 2;
-  const centerY = height / 2;
-  // Match FluidicCore's baseRadius calculation: Math.min(width, height) * 0.32
-  const maxRadius = Math.min(width, height) * 0.32;
+  // Get size from parent container (which is now a square)
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setSize(rect.width); // Square, so width === height
+      }
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    
+    const resizeObserver = new ResizeObserver(updateSize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener("resize", updateSize);
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  // All calculations use the same square size
+  const centerX = size / 2;
+  const centerY = size / 2;
+  // Match FluidicCore's baseRadius calculation exactly
+  const maxRadius = size * 0.32;
   const levels = 4;
   const hitRadius = Math.max(16, maxRadius * 0.22);
 
@@ -135,17 +156,11 @@ export function InteractiveRadar({ vectors, onChange, containerSize }: Interacti
   const hasActiveVectors = Object.values(vectors).some((v) => v > 0);
 
   return (
-    <div className="absolute inset-0">
+    <div ref={containerRef} className="absolute inset-0">
       <svg
         ref={svgRef}
-        width={width}
-        height={height}
-        viewBox={`0 0 ${width} ${height}`}
-        className="touch-none absolute top-0 left-0"
-        style={{
-          width: width || '100%',
-          height: height || '100%',
-        }}
+        viewBox={`0 0 ${size} ${size}`}
+        className="touch-none w-full h-full"
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
