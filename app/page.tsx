@@ -147,7 +147,7 @@ export default function XMusicBar() {
       {/* Fluidic Core with Interactive Radar overlay */}
       <section className="flex-1 min-h-0 px-2 py-1 md:px-0.5 md:py-0">
         <motion.div
-          className="relative rounded-2xl border border-border/30 overflow-hidden h-full min-h-0"
+          className="relative rounded-2xl overflow-visible h-full min-h-0"
           style={{
             background:
               "linear-gradient(180deg, oklch(0.10 0.015 260) 0%, oklch(0.08 0.01 260) 100%)",
@@ -177,13 +177,6 @@ export default function XMusicBar() {
                 >
                   {/* FluidicCore */}
                   <FluidicCore vectors={vectors} />
-                  {/* Semi-transparent overlay */}
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background: "oklch(0.05 0.01 260 / 0.3)",
-                    }}
-                  />
                   {/* Interactive Radar */}
                   <InteractiveRadar vectors={vectors} onChange={setVectors} />
                 </div>

@@ -77,21 +77,26 @@ export function FluidicCore({ vectors }: FluidicCoreProps) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Get size from parent container (which is now a square)
+    // Get size from container (which is now expanded by 1.4x)
     const rect = container.getBoundingClientRect();
-    const size = rect.width; // Square, so width === height
-    if (size === 0) return;
+    const canvasSize = rect.width; // The expanded canvas size
+    if (canvasSize === 0) return;
 
-    const width = size;
-    const height = size;
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const baseRadius = size * 0.37;
+    // Original size (before expansion) for baseRadius calculation
+    const CANVAS_EXPANSION = 1.4;
+    const originalSize = canvasSize / CANVAS_EXPANSION;
+
+    const width = canvasSize;
+    const height = canvasSize;
+    const centerX = canvasSize / 2;
+    const centerY = canvasSize / 2;
+    // baseRadius based on original size to keep the main shape the same size
+    const baseRadius = originalSize * 0.37;
 
     // Set canvas size with devicePixelRatio for crisp rendering
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
+    canvas.width = canvasSize * dpr;
+    canvas.height = canvasSize * dpr;
     ctx.scale(dpr, dpr);
 
     const animate = () => {
@@ -405,10 +410,20 @@ export function FluidicCore({ vectors }: FluidicCoreProps) {
     };
   }, [visualParams, vectors]);
 
+  // Expansion factor for canvas to allow particles to overflow
+  const CANVAS_EXPANSION = 1.4;
+  const offset = ((CANVAS_EXPANSION - 1) / 2) * 100; // 20%
+
   return (
     <motion.div
       ref={containerRef}
-      className="absolute inset-0"
+      className="absolute pointer-events-none"
+      style={{
+        top: `-${offset}%`,
+        left: `-${offset}%`,
+        width: `${CANVAS_EXPANSION * 100}%`,
+        height: `${CANVAS_EXPANSION * 100}%`,
+      }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
