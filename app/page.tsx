@@ -112,7 +112,7 @@ export default function XMusicBar() {
   }, []);
 
   return (
-    <main className="min-h-[100dvh] bg-background flex flex-col overflow-hidden">
+    <main className="min-h-[100dvh] h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header - compact */}
       <header className="shrink-0 px-4 pt-2 pb-1 md:pt-1 md:pb-0.5">
         <div className="flex items-center gap-3">
@@ -145,9 +145,9 @@ export default function XMusicBar() {
       </header>
 
       {/* Fluidic Core with Interactive Radar overlay */}
-      <section className="flex-1 px-2 py-1 md:px-0.5 md:py-0">
+      <section className="flex-1 min-h-0 px-2 py-1 md:px-0.5 md:py-0">
         <motion.div
-          className="relative rounded-2xl border border-border/30 overflow-hidden h-full"
+          className="relative rounded-2xl border border-border/30 overflow-hidden h-full min-h-0"
           style={{
             background:
               "linear-gradient(180deg, oklch(0.10 0.015 260) 0%, oklch(0.08 0.01 260) 100%)",
@@ -163,23 +163,10 @@ export default function XMusicBar() {
           <div ref={containerRef} className="h-full relative flex items-center justify-center p-2 md:p-0.5">
             {/* Square drawing area - centered in container with padding for labels */}
             {containerSize.width > 0 && containerSize.height > 0 && (() => {
-              // Use available space intelligently to prevent shrinking on wide screens
+              // Size the square by the limiting dimension to maximize visibility.
               const availableWidth = containerSize.width - 4;
               const availableHeight = containerSize.height - 4;
-              
-              // For very wide screens, use 90% of height (more aggressive)
-              // This ensures chart stays large even on ultra-wide displays
-              let squareSize;
-              if (availableWidth > availableHeight * 2) {
-                // Ultra-wide: use 90% of height
-                squareSize = availableHeight * 0.90;
-              } else if (availableWidth > availableHeight * 1.3) {
-                // Wide: use 95% of height
-                squareSize = availableHeight * 0.95;
-              } else {
-                // Normal: use smaller dimension
-                squareSize = Math.min(availableWidth, availableHeight) * 0.98;
-              }
+              const squareSize = Math.min(availableWidth, availableHeight) * 0.98;
               return (
                 <div 
                   className="relative"
