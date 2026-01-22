@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { FluidicCore } from "@/components/fluidic-core";
 import { SabitSliders } from "@/components/sabit-sliders";
@@ -79,9 +79,62 @@ const DEFAULT_VALUES: VectorValues = {
 };
 
 export default function XMusicBar() {
-  const [vectors, setVectors] = useState<VectorValues>(DEFAULT_VALUES);
+  const [vectors, setVectorsLocal] = useState<VectorValues>(DEFAULT_VALUES);
+  const [isConnected, setIsConnected] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const firebaseRef = useRef<any>(null);
+
+  // Firebase初期化（遅延読み込み）
+  useEffect(() => {
+    let mounted = true;
+    
+    const initFirebase = async () => {
+      try {
+        const { initializeApp, getApps } = await import("firebase/app");
+        const { getDatabase, ref, set, onValue } = await import("firebase/database");
+        
+        const firebaseConfig = {
+          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+          authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+          databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+          messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+          appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+        };
+
+        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+        const database = getDatabase(app);
+        
+        if (mounted) {
+          firebaseRef.current = { database, ref, set, onValue };
+          
+          // 接続状態の監視
+          const connectedRef = ref(database, ".info/connected");
+          onValue(connectedRef, (snapshot) => {
+            if (mounted) setIsConnected(snapshot.val() === true);
+          });
+        }
+      } catch (err) {
+        console.error("Firebase init error:", err);
+      }
+    };
+
+    initFirebase();
+    return () => { mounted = false; };
+  }, []);
+
+  // Firebaseへの書き込みを含むsetVectors
+  const setVectors = useCallback((newVectors: VectorValues) => {
+    setVectorsLocal(newVectors);
+    
+    if (firebaseRef.current) {
+      const { database, ref, set } = firebaseRef.current;
+      const sabitRef = ref(database, "sabit/current");
+      set(sabitRef, { ...newVectors, timestamp: Date.now() }).catch(console.error);
+    }
+  }, []);
 
   // Measure shared container and calculate square drawing area centered within it
   useEffect(() => {
@@ -116,35 +169,56 @@ export default function XMusicBar() {
     <main className="min-h-[100dvh] h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header - compact */}
       <header className="shrink-0 px-4 pt-2 pb-1 md:pt-1 md:pb-0.5">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{
-              background:
-                "linear-gradient(145deg, oklch(0.14 0.02 260) 0%, oklch(0.08 0.015 270) 100%)",
-              boxShadow: `
-                0 0 0 1px oklch(0.25 0.03 270),
-                0 4px 16px oklch(0.5 0.2 270 / 0.3),
-                inset 0 1px 0 oklch(1 0 0 / 0.05)
-              `,
-            }}
-          >
-            <XMusicBarIcon className="w-7 h-7" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(145deg, oklch(0.14 0.02 260) 0%, oklch(0.08 0.015 270) 100%)",
+                boxShadow: `
+                  0 0 0 1px oklch(0.25 0.03 270),
+                  0 4px 16px oklch(0.5 0.2 270 / 0.3),
+                  inset 0 1px 0 oklch(1 0 0 / 0.05)
+                `,
+              }}
+            >
+              <XMusicBarIcon className="w-7 h-7" />
+            </div>
+            <h1
+              style={{
+                fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+                fontSize: "17px",
+                fontWeight: 600,
+                letterSpacing: "-0.02em",
+                color: "oklch(0.95 0.01 260)",
+                lineHeight: "40px",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              x-Music Bar
+            </h1>
           </div>
-          <h1
-            style={{
-              fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
-              fontSize: "17px",
-              fontWeight: 600,
-              letterSpacing: "-0.02em",
-              color: "oklch(0.95 0.01 260)",
-              lineHeight: "40px",
-              display: "flex",
-              alignItems: "center",
-            }}
+          {/* 接続状態インジケーター */}
+          <div 
+            className="flex items-center gap-1.5"
+            title={isConnected ? "Firebaseに接続中" : "オフライン"}
           >
-            x-Music Bar
-          </h1>
+            <div 
+              className="w-2 h-2 rounded-full"
+              style={{ 
+                backgroundColor: isConnected ? "oklch(0.75 0.2 145)" : "oklch(0.5 0.05 260)",
+                boxShadow: isConnected ? "0 0 6px oklch(0.75 0.2 145)" : "none",
+              }}
+            />
+            <span 
+              className="text-xs"
+              style={{ color: "oklch(0.5 0.02 260)" }}
+            >
+              {isConnected ? "SYNC" : "LOCAL"}
+            </span>
+          </div>
         </div>
       </header>
 
