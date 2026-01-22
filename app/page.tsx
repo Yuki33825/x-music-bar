@@ -36,26 +36,27 @@ function XMusicBarIcon({ className }: { className?: string }) {
         </filter>
       </defs>
       
-      {/* Martini glass outline */}
-      <path
-        d="M5 3H19L12 12V19H15V21H9V19H12V12L5 3Z"
-        stroke="url(#glassGradient)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      
-      {/* Sound wave - extends above glass, 3-4 folds */}
-      <g filter="url(#glow)">
+      {/* Sound wave - in background behind glass, centered */}
+      <g>
         <path
-          d="M4 5L8 1L12 6L16 0L20 4"
+          d="M4 10 L6 8.5 L8 11 L10 9.5 L12 12 L14 9.5 L16 11 L18 8.5 L20 10"
           stroke="url(#waveGradient)"
-          strokeWidth="1.3"
+          strokeWidth="1.2"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
+          opacity="0.8"
         />
+      </g>
+      
+      {/* Regular cocktail glass - in front, centered */}
+      <g stroke="url(#glassGradient)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none">
+        {/* Top rim (elliptical) */}
+        <ellipse cx="12" cy="8" rx="7" ry="0.8" />
+        {/* Body and stem as one connected path */}
+        <path d="M5 8.5 L8 13.5 L12 14.5 L16 13.5 L19 8.5 M12 14.5 L12 20.5" />
+        {/* Base (circular) */}
+        <ellipse cx="12" cy="21.5" rx="2" ry="0.5" />
       </g>
     </svg>
   );
@@ -137,6 +138,9 @@ export default function XMusicBar() {
               fontWeight: 600,
               letterSpacing: "-0.02em",
               color: "oklch(0.95 0.01 260)",
+              lineHeight: "40px",
+              display: "flex",
+              alignItems: "center",
             }}
           >
             x-Music Bar
